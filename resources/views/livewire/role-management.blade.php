@@ -1,23 +1,41 @@
 <div>
-    <!-- Top Action Bar -->
-    <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <!-- Search (Global Component) -->
-        <div class="w-full sm:w-72">
-            <x-form.search
-                wire:model.live.debounce.300ms="search"
-                placeholder="Cari nama role..."
-            />
-        </div>
+    <!-- Modern Unified Toolbar -->
+    <x-toolbar>
+        <x-slot:filters>
+            <!-- Search (Global Component) -->
+            <div class="w-full sm:w-72">
+                <x-form.search
+                    wire:model.live.debounce.300ms="search"
+                    placeholder="Cari nama role..."
+                />
+            </div>
 
-        @can('roles.create')
-            <x-button type="button" @click="$wire.showCreateModal = true; $wire.openCreateModal()" variant="primary">
-                <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Tambah Role Baru
-            </x-button>
-        @endcan
-    </div>
+            @if ($this->hasActiveFilters)
+                <button
+                    type="button"
+                    wire:click="resetFilters"
+                    class="h-10 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 border border-rose-200/60 dark:border-rose-900/40 transition duration-150 cursor-pointer"
+                    title="Reset pencarian"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    <span>Reset</span>
+                </button>
+            @endif
+        </x-slot:filters>
+
+        <x-slot:actions>
+            @can('roles.create')
+                <x-button type="button" @click="$wire.showCreateModal = true; $wire.openCreateModal()" variant="primary">
+                    <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Tambah Role Baru
+                </x-button>
+            @endcan
+        </x-slot:actions>
+    </x-toolbar>
 
     <!-- Role Cards Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">

@@ -29,6 +29,17 @@ class ActivityLogViewer extends Component
         $this->resetPage();
     }
 
+    public function resetFilters(): void
+    {
+        $this->reset(['search', 'moduleFilter', 'actionFilter']);
+        $this->resetPage();
+    }
+
+    public function getHasActiveFiltersProperty(): bool
+    {
+        return !empty($this->search) || !empty($this->moduleFilter) || !empty($this->actionFilter);
+    }
+
     public function render()
     {
         $logs = ActivityLog::with('user')

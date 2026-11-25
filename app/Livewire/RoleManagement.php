@@ -12,6 +12,16 @@ class RoleManagement extends Component
     public string $newRoleName = '';
     public bool $showCreateModal = false;
 
+    public function resetFilters(): void
+    {
+        $this->search = '';
+    }
+
+    public function getHasActiveFiltersProperty(): bool
+    {
+        return !empty($this->search);
+    }
+
     // Delete role state
     public bool $showDeleteModal = false;
     public ?int $roleToDeleteId = null;

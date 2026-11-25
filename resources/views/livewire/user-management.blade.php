@@ -1,8 +1,7 @@
 <div>
-    <!-- Top Action Bar & Filters -->
-    <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <!-- Search & Filter Controls -->
-        <div class="flex flex-wrap items-center gap-3 flex-1">
+    <!-- Modern Unified Toolbar (Search, Dynamic Filters & Actions) -->
+    <x-toolbar>
+        <x-slot:filters>
             <!-- Global Search Component -->
             <div class="w-full sm:w-72">
                 <x-form.search
@@ -12,42 +11,59 @@
             </div>
 
             <!-- Role Filter -->
-            <select
+            <x-form.select-filter
                 wire:model.live="selectedRole"
-                class="rounded-xl border border-slate-300 dark:border-slate-700/80 bg-white dark:bg-slate-900 px-3.5 py-2 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition"
+                :active="!empty($selectedRole)"
             >
                 <option value="">Semua Role</option>
                 @foreach ($roles as $r)
                     @php $rName = is_array($r) ? ($r['name'] ?? reset($r)) : (is_object($r) ? ($r->name ?? (string)$r) : (string)$r); @endphp
                     <option value="{{ $rName }}">{{ $rName }}</option>
                 @endforeach
-            </select>
+            </x-form.select-filter>
 
             <!-- Status Filter -->
-            <select
+            <x-form.select-filter
                 wire:model.live="statusFilter"
-                class="rounded-xl border border-slate-300 dark:border-slate-700/80 bg-white dark:bg-slate-900 px-3.5 py-2 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition"
+                :active="$statusFilter !== ''"
             >
                 <option value="">Semua Status</option>
                 <option value="1">Aktif</option>
                 <option value="0">Nonaktif</option>
-            </select>
-        </div>
+            </x-form.select-filter>
 
-        <!-- Add User Button -->
-        @can('users.create')
-            <x-button
-                type="button"
-                @click="$dispatch('open-modal', 'user-form'); $wire.openCreateModal()"
-                variant="primary"
-            >
-                <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Tambah Pengguna
-            </x-button>
-        @endcan
-    </div>
+            <!-- Reset Filter Button (Auto-appears when filtered) -->
+            @if ($this->hasActiveFilters)
+                <button
+                    type="button"
+                    wire:click="resetFilters"
+                    class="h-10 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 border border-rose-200/60 dark:border-rose-900/40 transition duration-150 cursor-pointer"
+                    title="Reset semua filter"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    <span>Reset</span>
+                </button>
+            @endif
+        </x-slot:filters>
+
+        <x-slot:actions>
+            <!-- Add User Button -->
+            @can('users.create')
+                <x-button
+                    type="button"
+                    @click="$dispatch('open-modal', 'user-form'); $wire.openCreateModal()"
+                    variant="primary"
+                >
+                    <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Tambah Pengguna
+                </x-button>
+            @endcan
+        </x-slot:actions>
+    </x-toolbar>
 
     <!-- Users Table -->
     <x-table>

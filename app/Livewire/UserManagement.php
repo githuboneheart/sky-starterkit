@@ -67,6 +67,17 @@ class UserManagement extends Component
         $this->resetPage();
     }
 
+    public function resetFilters(): void
+    {
+        $this->reset(['search', 'selectedRole', 'statusFilter']);
+        $this->resetPage();
+    }
+
+    public function getHasActiveFiltersProperty(): bool
+    {
+        return !empty($this->search) || !empty($this->selectedRole) || $this->statusFilter !== '';
+    }
+
     public function sortBy(string $field): void
     {
         if ($this->sortField === $field) {

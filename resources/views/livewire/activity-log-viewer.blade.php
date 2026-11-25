@@ -1,7 +1,7 @@
 <div>
-    <!-- Filter bar -->
-    <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="flex flex-wrap items-center gap-3 flex-1">
+    <!-- Modern Unified Toolbar (Search & Filters) -->
+    <x-toolbar>
+        <x-slot:filters>
             <!-- Global Search Component -->
             <div class="w-full sm:w-72">
                 <x-form.search
@@ -11,28 +11,43 @@
             </div>
 
             <!-- Module Filter -->
-            <select
+            <x-form.select-filter
                 wire:model.live="moduleFilter"
-                class="rounded-xl border border-slate-300 dark:border-slate-700/80 bg-white dark:bg-slate-900 px-3.5 py-2 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition"
+                :active="!empty($moduleFilter)"
             >
                 <option value="">Semua Modul</option>
                 @foreach ($modules as $mod)
                     <option value="{{ $mod }}">{{ $mod }}</option>
                 @endforeach
-            </select>
+            </x-form.select-filter>
 
             <!-- Action Filter -->
-            <select
+            <x-form.select-filter
                 wire:model.live="actionFilter"
-                class="rounded-xl border border-slate-300 dark:border-slate-700/80 bg-white dark:bg-slate-900 px-3.5 py-2 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition"
+                :active="!empty($actionFilter)"
             >
                 <option value="">Semua Aksi</option>
                 @foreach ($actions as $act)
                     <option value="{{ $act }}">{{ $act }}</option>
                 @endforeach
-            </select>
-        </div>
-    </div>
+            </x-form.select-filter>
+
+            <!-- Reset Filter Button -->
+            @if ($this->hasActiveFilters)
+                <button
+                    type="button"
+                    wire:click="resetFilters"
+                    class="h-10 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 border border-rose-200/60 dark:border-rose-900/40 transition duration-150 cursor-pointer"
+                    title="Reset semua filter"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    <span>Reset</span>
+                </button>
+            @endif
+        </x-slot:filters>
+    </x-toolbar>
 
     <!-- Activity Log Table -->
     <x-table>
