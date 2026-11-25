@@ -1,0 +1,268 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../vendor/livewire/livewire/src/**/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@import 'flatpickr/dist/flatpickr.min.css';
+
+@theme {
+    --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+
+    /* Semantic Primary Brand Colors (PT Maju Bersama Medika - Default: Royal Blue) */
+    /* Ubah di sini untuk mengubah tema warna ke SELURUH modul dan komponen secara serentak */
+    --color-primary-50:  #eff6ff;
+    --color-primary-100: #dbeafe;
+    --color-primary-200: #bfdbfe;
+    --color-primary-300: #93c5fd;
+    --color-primary-400: #60a5fa;
+    --color-primary-500: #3b82f6;
+    --color-primary-600: #2563eb; /* Primary Brand MBM */
+    --color-primary-700: #1d4ed8;
+    --color-primary-800: #1e40af;
+    --color-primary-900: #1e3a8a;
+    --color-primary-950: #172554;
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+html.dark {
+    color-scheme: dark;
+}
+
+html:not(.dark) {
+    color-scheme: light;
+}
+
+/* Fix Browser Autofill (Chrome, Edge, Safari) in Dark & Light Modes */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+input:autofill,
+input:autofill:hover,
+input:autofill:focus,
+input:autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+    box-shadow: 0 0 0 1000px #ffffff inset !important;
+    -webkit-text-fill-color: #0f172a !important;
+    caret-color: #0f172a !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark input:-webkit-autofill:active,
+.dark input:autofill,
+.dark input:autofill:hover,
+.dark input:autofill:focus,
+.dark input:autofill:active,
+html.dark input:-webkit-autofill,
+html.dark input:-webkit-autofill:hover,
+html.dark input:-webkit-autofill:focus,
+html.dark input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #0f172a inset !important;
+    box-shadow: 0 0 0 1000px #0f172a inset !important;
+    -webkit-text-fill-color: #f8fafc !important;
+    caret-color: #f8fafc !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Modern Sleek Scrollbar (Zero Ugly Native White Bars) */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+
+.dark * {
+    scrollbar-color: #334155 transparent;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background-color: #334155;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background-color: #475569;
+}
+
+::-webkit-scrollbar-button {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* ==========================================================================
+   ✨ Global Micro-Interactions & Animation System (MBM Modern Standard)
+   ========================================================================== */
+
+/* 1. Livewire 3 wire:navigate Top Progress Bar */
+#nprogress .bar,
+.livewire-progress-bar,
+div[wire\:navigate-progress] {
+    background: #2563eb !important;
+    height: 3px !important;
+    box-shadow: 0 0 10px #3b82f6, 0 0 5px #2563eb !important;
+    z-index: 99999 !important;
+}
+
+/* 2. Shimmer Wave Animation for Skeleton Loaders */
+@keyframes mbm-shimmer {
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.animate-shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.animate-shimmer::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0,
+        rgba(255, 255, 255, 0.25) 20%,
+        rgba(255, 255, 255, 0.5) 60%,
+        rgba(255, 255, 255, 0)
+    );
+    animation: mbm-shimmer 2s infinite;
+    content: '';
+}
+
+.dark .animate-shimmer::after {
+    background-image: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0,
+        rgba(255, 255, 255, 0.05) 20%,
+        rgba(255, 255, 255, 0.1) 60%,
+        rgba(255, 255, 255, 0)
+    );
+}
+
+/* 3. Reusable Micro-Interaction Utility Classes */
+.micro-lift {
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+}
+
+.micro-lift:hover {
+    transform: translateY(-2px);
+}
+
+.tactile-press {
+    transition: transform 0.1s ease;
+}
+
+.tactile-press:active {
+    transform: scale(0.98);
+}
+
+/* 4. Ambient & Entrance Animations */
+@keyframes float-slow {
+    0%, 100% {
+        transform: translateY(0px) scale(1);
+    }
+    50% {
+        transform: translateY(-16px) scale(1.06);
+    }
+}
+
+@keyframes float-reverse {
+    0%, 100% {
+        transform: translateY(0px) scale(1);
+    }
+    50% {
+        transform: translateY(16px) scale(0.96);
+    }
+}
+
+@keyframes pulse-subtle {
+    0%, 100% {
+        opacity: 0.18;
+    }
+    50% {
+        opacity: 0.32;
+    }
+}
+
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-up {
+    animation: fade-in-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-float-slow {
+    animation: float-slow 8s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+    animation: float-reverse 10s ease-in-out infinite;
+}
+
+.animate-pulse-subtle {
+    animation: pulse-subtle 5s ease-in-out infinite;
+}
+
+.delay-50  { animation-delay: 50ms; }
+.delay-75  { animation-delay: 75ms; }
+.delay-100 { animation-delay: 100ms; }
+.delay-125 { animation-delay: 125ms; }
+.delay-150 { animation-delay: 150ms; }
+.delay-175 { animation-delay: 175ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-250 { animation-delay: 250ms; }
+.delay-300 { animation-delay: 300ms; }
+
+/* 5. Accessibility: Reduced Motion Safety */
+@media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
