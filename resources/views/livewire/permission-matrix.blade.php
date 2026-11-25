@@ -158,8 +158,8 @@
                                 <span class="block text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">
                                     {{ $perm->name }}
                                 </span>
-                                <span class="block text-[11px] text-slate-400 dark:text-slate-500 truncate">
-                                    Guard: {{ $perm->guard_name }}
+                                <span class="block text-[11px] text-slate-400 dark:text-slate-500 truncate" title="{{ $this->getPermissionDescription($perm->name) }}">
+                                    {{ $this->getPermissionDescription($perm->name) }}
                                 </span>
                             </div>
 

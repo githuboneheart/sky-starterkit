@@ -37,7 +37,8 @@ Whenever you are asked to build a new feature or module (e.g. from a `PRD.md`), 
    ```
 
 ### Step 2: Register Permissions & Dynamic Navigation (NEVER SKIP)
-1. Add new permissions in `database/seeders/RolesAndPermissionsSeeder.php`:
+1. **Daftarkan Permission di `config/permission_list.php`:**
+   Setiap kali membuat model atau modul baru, AI Agent **WAJIB** menambahkan izinnya ke dalam `config/permission_list.php`:
    ```php
    'Order Management' => [
        'orders.view_all' => 'Lihat seluruh pesanan pengguna',
@@ -48,8 +49,10 @@ Whenever you are asked to build a new feature or module (e.g. from a `PRD.md`), 
        'orders.export'   => 'Ekspor rekap pesanan',
    ],
    ```
-2. **Auto-Grouping in Matrix UI:**
-   * Because permissions use prefix `orders.*`, the Permission Matrix (`/permissions`) will **automatically generate** a dedicated card titled `"Orders"` without modifying any PHP file!
+2. **Auto-Sync Tanpa Perlu Seeder Terminal:**
+   * Halaman `/permissions` otomatis melakukan sinkronisasi saat dibuka!
+   * Member atau developer **TIDAK PERLU MENGETIK** `php artisan db:seed` secara manual.
+   * Super Admin otomatis menerima 100% izin baru tersebut secara instan.
 3. **Dynamic Sidebar Registration (`config/navigation.php`):**
    * Register the menu item in `config/navigation.php` under the appropriate group with `'permission' => 'orders.view'` and `'active' => 'orders.*'`:
    ```php
@@ -62,10 +65,6 @@ Whenever you are asked to build a new feature or module (e.g. from a `PRD.md`), 
    ],
    ```
    * **Never hardcode static menus in Blade!** The sidebar automatically checks `$user->can('orders.view')` and omits the entire group if the user has no permissions.
-4. **Execute Non-Destructive Sync:**
-   * Run: `php artisan db:seed --class=RolesAndPermissionsSeeder`
-   * Super Admin automatically receives 100% of the new permissions.
-   * Existing role assignments in the database are safely preserved (`firstOrCreate`).
 
 ### Step 3: Register Multi-Page Routes (`routes/web.php`)
 **MANDATORY RULE:** Always register full-page Livewire components for multi-page CRUD. Group routes under `auth` middleware:

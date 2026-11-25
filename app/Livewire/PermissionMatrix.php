@@ -21,9 +21,44 @@ class PermissionMatrix extends Component
 
     public function mount(?int $roleId = null): void
     {
+        $this->syncPermissionsFromConfig();
         $firstRole = Role::first();
         $this->selectedRoleId = $roleId ?? ($firstRole?->id ?? 1);
         $this->loadRolePermissions();
+    }
+
+    /**
+     * Otomatis sinkronisasi permission dari config/permission_list.php ke database.
+     * Tidak perlu lagi menjalankan 'php artisan db:seed' secara manual!
+     */
+    public function syncPermissionsFromConfig(): void
+    {
+        $configList = config('permission_list', []);
+        if (empty($configList)) {
+            return;
+        }
+
+        $allDbPermissions = Permission::pluck('name')->toArray();
+        $newPermissions = [];
+
+        foreach ($configList as $group => $permissions) {
+            foreach ($permissions as $name => $desc) {
+                if (!in_array($name, $allDbPermissions)) {
+                    $newPermissions[] = $name;
+                }
+            }
+        }
+
+        if (!empty($newPermissions)) {
+            $superAdmin = Role::firstOrCreate(['name' => 'Super Admin', 'guard_name' => 'web']);
+
+            foreach ($newPermissions as $permName) {
+                $p = Permission::firstOrCreate(['name' => $permName, 'guard_name' => 'web']);
+                $superAdmin->givePermissionTo($p);
+            }
+
+            app()[PermissionRegistrar::class]->forgetCachedPermissions();
+        }
     }
 
     public function selectRole(int $roleId): void
@@ -164,21 +199,22 @@ class PermissionMatrix extends Component
     }
 
     /**
-     * Helper to group permissions logically by prefix/domain (with dynamic auto-grouping).
+     * Helper to group permissions logically using config/permission_list.php and dynamic prefix fallback.
      */
     private function getGroupedPermissions(): array
     {
         $allPermissions = Permission::orderBy('name')->get();
+        $configList = config('permission_list', []);
 
-        $groups = [
-            'Manajemen Pengguna & Profil' => [],
-            'Role & Hak Akses' => [],
-            'Pengaturan & Konfigurasi' => [],
-            'Audit & Log Sistem' => [],
-            'Academy13 (Bimbel Kedinasan)' => [],
-            'Fisio13 (Klinik Fisioterapi)' => [],
-            'Kasir POS & Keuangan' => [],
-        ];
+        $groups = [];
+        $permissionToGroup = [];
+
+        foreach ($configList as $groupTitle => $items) {
+            $groups[$groupTitle] = [];
+            foreach ($items as $name => $desc) {
+                $permissionToGroup[$name] = $groupTitle;
+            }
+        }
 
         foreach ($allPermissions as $perm) {
             $name = $perm->name;
@@ -188,34 +224,36 @@ class PermissionMatrix extends Component
                 continue;
             }
 
-            if (str_starts_with($name, 'users.') || str_starts_with($name, 'profile.')) {
-                $groups['Manajemen Pengguna & Profil'][] = $perm;
-            } elseif (str_starts_with($name, 'roles.') || str_starts_with($name, 'permissions.')) {
-                $groups['Role & Hak Akses'][] = $perm;
-            } elseif (str_starts_with($name, 'settings.')) {
-                $groups['Pengaturan & Konfigurasi'][] = $perm;
-            } elseif (str_starts_with($name, 'activity_logs.')) {
-                $groups['Audit & Log Sistem'][] = $perm;
-            } elseif (str_starts_with($name, 'academy.') || str_starts_with($name, 'curriculum.') || str_starts_with($name, 'quiz.') || str_starts_with($name, 'tryout.') || str_starts_with($name, 'teaching.')) {
-                $groups['Academy13 (Bimbel Kedinasan)'][] = $perm;
-            } elseif (str_starts_with($name, 'fisio.') || str_starts_with($name, 'appointments.') || str_starts_with($name, 'soap.') || str_starts_with($name, 'patient_card.')) {
-                $groups['Fisio13 (Klinik Fisioterapi)'][] = $perm;
-            } elseif (str_starts_with($name, 'pos.') || str_starts_with($name, 'finance.') || str_starts_with($name, 'payroll.')) {
-                $groups['Kasir POS & Keuangan'][] = $perm;
+            if (isset($permissionToGroup[$name])) {
+                $groups[$permissionToGroup[$name]][] = $perm;
             } else {
-                // Dynamic Auto-Grouping by prefix (e.g. 'inventory.view' -> 'Inventory', 'medical_records.create' -> 'Medical Records')
+                // Dynamic Auto-Grouping by prefix (e.g. 'inventory.view' -> 'Inventory')
                 if (str_contains($name, '.')) {
                     $prefix = explode('.', $name, 2)[0];
                     $groupTitle = str($prefix)->replace(['_', '-'], ' ')->title()->toString();
                     $groups[$groupTitle][] = $perm;
                 } else {
-                    $groups['Lainnya / Kustom'][] = $perm;
+                    $groups['Modul Kustom'][] = $perm;
                 }
             }
         }
 
-        // Remove empty groups if search filtered out
+        // Remove empty groups
         return array_filter($groups, fn($items) => !empty($items));
+    }
+
+    /**
+     * Dapatkan deskripsi ramah untuk permission dari config/permission_list.php.
+     */
+    public function getPermissionDescription(string $name): string
+    {
+        $configList = config('permission_list', []);
+        foreach ($configList as $group => $items) {
+            if (isset($items[$name])) {
+                return $items[$name];
+            }
+        }
+        return 'Hak akses modul ' . $name;
     }
 
     public function render()
