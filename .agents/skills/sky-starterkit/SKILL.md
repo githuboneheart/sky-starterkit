@@ -251,15 +251,40 @@ class OrderEdit extends Component
         </x-page-header>
     </x-slot:header>
 
-    <!-- Top Action Bar & Filter -->
-    <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div class="w-full sm:w-72">
-            <x-form.search
-                wire:model.live.debounce.300ms="search"
-                placeholder="Cari nomor pesanan..."
-            />
-        </div>
-    </div>
+    <!-- Modern Unified Toolbar (Search & Filter Controls) -->
+    <x-toolbar>
+        <x-slot:filters>
+            <div class="w-full sm:w-72">
+                <x-form.search
+                    wire:model.live.debounce.300ms="search"
+                    placeholder="Cari nomor pesanan..."
+                />
+            </div>
+
+            <!-- Optional Select Filter Example -->
+            {{--
+            <x-form.select-filter wire:model.live="statusFilter" :active="$statusFilter !== ''">
+                <option value="">Semua Status</option>
+                <option value="pending">Pending</option>
+                <option value="completed">Selesai</option>
+            </x-form.select-filter>
+            --}}
+
+            @if ($search !== '')
+                <button
+                    type="button"
+                    wire:click="$set('search', '')"
+                    class="h-10 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 border border-rose-200/60 dark:border-rose-900/40 transition duration-150 cursor-pointer"
+                    title="Reset pencarian"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    <span>Reset</span>
+                </button>
+            @endif
+        </x-slot:filters>
+    </x-toolbar>
 
     <!-- Data Table -->
     <x-table>
