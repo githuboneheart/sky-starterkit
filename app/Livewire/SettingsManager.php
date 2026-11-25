@@ -45,14 +45,17 @@ class SettingsManager extends Component
     public string $whatsapp_welcome_message = '';
     public string $test_wa_number = '';
 
-    // 4. Payment Gateway
+    // 4. Payment Methods & Gateway
+    public bool $payment_gateway_enabled = false;
     public string $payment_gateway_provider = 'midtrans';
     public string $payment_gateway_environment = 'sandbox';
     public string $payment_gateway_merchant_id = '';
     public string $payment_gateway_client_key = '';
     public string $payment_gateway_server_key = '';
 
-    // 5. Manual Payment & QRIS
+    // 5. Manual Bank Accounts & QRIS
+    public bool $manual_bank_enabled = true;
+    public bool $manual_qris_enabled = true;
     public array $bank_accounts = [];
     public $new_qris_image;
     public ?string $current_qris_image = null;
@@ -99,13 +102,16 @@ class SettingsManager extends Component
         $this->whatsapp_welcome_message = setting('whatsapp_welcome_message', '');
 
         // 4. Payment Gateway
+        $this->payment_gateway_enabled = (bool) setting('payment_gateway_enabled', false);
         $this->payment_gateway_provider = setting('payment_gateway_provider', 'midtrans');
         $this->payment_gateway_environment = setting('payment_gateway_environment', 'sandbox');
         $this->payment_gateway_merchant_id = setting('payment_gateway_merchant_id', '');
         $this->payment_gateway_client_key = setting('payment_gateway_client_key', '');
         $this->payment_gateway_server_key = setting('payment_gateway_server_key', '');
 
-        // 5. Manual Payment
+        // 5. Manual Payment & QRIS
+        $this->manual_bank_enabled = (bool) setting('manual_bank_enabled', true);
+        $this->manual_qris_enabled = (bool) setting('manual_qris_enabled', true);
         $bankJson = setting('manual_bank_accounts');
         if ($bankJson && is_string($bankJson)) {
             $this->bank_accounts = json_decode($bankJson, true) ?? [];
@@ -266,6 +272,7 @@ class SettingsManager extends Component
 
     public function savePaymentGateway(): void
     {
+        AppSetting::set('payment_gateway_enabled', $this->payment_gateway_enabled ? '1' : '0', 'payment_gateway', 'boolean');
         AppSetting::set('payment_gateway_provider', $this->payment_gateway_provider, 'payment_gateway');
         AppSetting::set('payment_gateway_environment', $this->payment_gateway_environment, 'payment_gateway');
         AppSetting::set('payment_gateway_merchant_id', $this->payment_gateway_merchant_id, 'payment_gateway');
@@ -276,12 +283,25 @@ class SettingsManager extends Component
         $this->dispatch('toast', type: 'success', message: 'Pengaturan Payment Gateway berhasil disimpan!');
     }
 
-    public function saveManualPayment(): void
+    public function saveManualBank(): void
     {
         $this->validate([
             'bank_accounts.*.bank' => 'required|string',
             'bank_accounts.*.account_number' => 'required|string',
             'bank_accounts.*.account_name' => 'required|string',
+        ]);
+
+        AppSetting::set('manual_bank_enabled', $this->manual_bank_enabled ? '1' : '0', 'manual_payment', 'boolean');
+        AppSetting::set('manual_bank_accounts', json_encode(array_values($this->bank_accounts)), 'manual_payment', 'json');
+        AppSetting::set('manual_payment_instruction', $this->manual_payment_instruction, 'manual_payment');
+
+        activity_log('UPDATE', 'Setting', 'Memperbarui daftar rekening transfer bank manual');
+        $this->dispatch('toast', type: 'success', message: 'Pengaturan Rekening Transfer Bank berhasil disimpan!');
+    }
+
+    public function saveManualQris(): void
+    {
+        $this->validate([
             'new_qris_image' => 'nullable|image|max:2048',
         ]);
 
@@ -302,11 +322,16 @@ class SettingsManager extends Component
             $this->new_qris_image = null;
         }
 
-        AppSetting::set('manual_bank_accounts', json_encode(array_values($this->bank_accounts)), 'manual_payment', 'json');
-        AppSetting::set('manual_payment_instruction', $this->manual_payment_instruction, 'manual_payment');
+        AppSetting::set('manual_qris_enabled', $this->manual_qris_enabled ? '1' : '0', 'manual_payment', 'boolean');
 
-        activity_log('UPDATE', 'Setting', 'Memperbarui daftar rekening transfer bank dan gambar QRIS');
-        $this->dispatch('toast', type: 'success', message: 'Pengaturan Pembayaran Manual & QRIS berhasil disimpan!');
+        activity_log('UPDATE', 'Setting', 'Memperbarui gambar QRIS statis kasir');
+        $this->dispatch('toast', type: 'success', message: 'Pengaturan QRIS Kasir berhasil disimpan!');
+    }
+
+    public function saveManualPayment(): void
+    {
+        $this->saveManualBank();
+        $this->saveManualQris();
     }
 
     public function render()
